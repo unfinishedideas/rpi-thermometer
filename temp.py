@@ -13,31 +13,27 @@ for proc in psutil.process_iter():
         proc.kill()
 sensor = adafruit_dht.DHT11(board.D23)
 
-SLEEP = 900
+SLEEP = 300.0
 
 # Write the headers for the columns
-with open('temps.csv', 'wb') as csvfile:
+with open('temps.csv', 'w', newline='') as csvfile:
+    headerlist = ['date', 'time', 'temp c', 'temp f', 'humidity %']
     writer = csv.writer(csvfile, delimiter=',', quotechar='"')
-    writer.writerow(['date', 'time', 'temp c', 'temp f', 'humidity %'])
-
-while True:
-    try:
-        temp_c = sensor.temperature
-        temp_f = (temp_c - 32) * (5/9)
-        humidity = sensor.humidity
-        print("Temperature: {}*C  {}*F  Humidity: {}% ".format(temp_c, temp_f, humidity))
-        with open('temps.csv', 'wb') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', quotechar='"')
+    writer.writerow(headerlist)
+    while True:
+        try:
             now = datetime.now()
+            temp_c = sensor.temperature
+            temp_f = (temp_c * (9/5)) + 32
+            humidity = sensor.humidity
             writer.writerow([f'{now.year}/{now.month}/{now.day}', f'{now.hour}:{now.minute}:{now.second}', f'{temp_c}', f'{temp_f}', f'{humidity}', '\n'])
-
-        csvfile.close()
-    except RuntimeError as error:
-        print(error.args[0])
+            print(f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute} | Temperature: {temp_c}*C {temp_f}*F | Humidity: {humidity}%")
+        except RuntimeError as error:
+            print(error.args[0])
+            time.sleep(SLEEP)
+            continue
+        except Exception as error:
+            sensor.exit()
+            csvfile.close()
+            raise error
         time.sleep(SLEEP)
-        continue
-    except Exception as error:
-        sensor.exit()
-        csvfile.close()
-        raise error
-    time.sleep(SLEEP)
