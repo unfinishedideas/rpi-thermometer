@@ -1,4 +1,7 @@
 # https://www.freva.com/dht11-temperature-and-humidity-sensor-on-raspberry-pi/
+#!/usr/bin/env python3
+
+print("Starting temperature sensor readings")
 
 import csv
 import time
@@ -28,9 +31,12 @@ with open('temps.csv', 'w', newline='') as csvfile:
             humidity = sensor.humidity
             writer.writerow([f'{now.year}/{now.month}/{now.day}', f'{now.hour}:{now.minute}:{now.second}', f'{temp_c}', f'{temp_f}', f'{humidity}', '\n'])
             print(f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute} | Temperature: {temp_c}*C {temp_f}*F | Humidity: {humidity}%")
+            textlog = open("attic-log.txt", "a")
+            textlog.write(f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute} | Temperature: {temp_c}*C {temp_f}*F | Humidity: {humidity}%")
+            textlog.close()
         except RuntimeError as error:
             print(error.args[0])
-            time.sleep(SLEEP)
+            time.sleep(1.0)
             continue
         except Exception as error:
             sensor.exit()
