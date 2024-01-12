@@ -25,16 +25,22 @@ with open('temps.csv', 'w', newline='') as csvfile:
     writer.writerow(headerlist)
     while True:
         try:
+            # Write to CSV file
             now = datetime.now()
             temp_c = sensor.temperature
             temp_f = (temp_c * (9/5)) + 32
             humidity = sensor.humidity
             writer.writerow([f'{now.year}/{now.month}/{now.day}', f'{now.hour}:{now.minute}:{now.second}', f'{temp_c}', f'{temp_f}', f'{humidity}', '\n'])
-            print(f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute} | Temperature: {temp_c}*C {temp_f}*F | Humidity: {humidity}%")
+
+            # Write to log file and print to screen
             textlog = open("attic-log.txt", "a")
-            textlog.write(f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute} | Temperature: {temp_c}*C {temp_f}*F | Humidity: {humidity}%")
+            log_string = f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute} | Temperature: {temp_c}*C {temp_f}*F | Humidity: {humidity}%"
+            textlog.write(f"{log_string}\n")
             textlog.close()
+            print(log_string)
+
         except RuntimeError as error:
+            # Errors happen often, re-read!
             print(error.args[0])
             time.sleep(1.0)
             continue
